@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FRUVERA</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.4/babel.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+  html, body { margin:0; padding:0; background:#1B2E28; }
+  #root { min-height:100vh; }
+
+  .fv-root {
+    --forest: #1B2E28; --forest-2:#223A32; --parchment:#F1ECD9; --parchment-2:#E8E1C7;
+    --mango:#E8871E; --mango-dark:#C96F12; --chili:#C23B22; --leaf:#6B8F3D; --ink:#24261F;
+    --cream-text:#F7F3E8; --muted:#8A8A78;
+    font-family:'Work Sans', sans-serif; color:var(--ink); min-height:100vh; background:var(--parchment); position:relative;
+  }
+  .fv-center { display:flex; align-items:center; justify-content:center; min-height:100vh; }
+  .fv-loading { display:flex; align-items:center; gap:8px; color:var(--forest); font-weight:600; }
+
+  .fv-login-bg { background: var(--forest); }
+  .fv-login-wrap { display:flex; min-height:100vh; flex-wrap:wrap; }
+  .fv-login-hero { flex:1 1 320px; background:var(--forest); color:var(--cream-text); padding:48px 40px; display:flex; flex-direction:column; justify-content:center; gap:18px; }
+  .fv-brand { font-family:'Fraunces', serif; font-weight:700; font-size:30px; letter-spacing:0.5px; display:flex; align-items:center; gap:10px; color:var(--mango); }
+  .fv-brand-sm { font-size:18px; }
+  .fv-tagline { color:var(--parchment-2); font-size:14.5px; max-width:340px; line-height:1.5; }
+  .fv-hero-ticket { margin-top:10px; background:var(--parchment); color:var(--ink); border-radius:10px; padding:16px 18px; width:270px; font-family:'IBM Plex Mono', monospace; font-size:12.5px; border-top:3px dashed var(--forest-2); box-shadow:0 10px 24px rgba(0,0,0,0.25); }
+  .fv-ticket-row { display:flex; justify-content:space-between; padding:3px 0; }
+  .fv-ticket-status span:last-child { color:var(--mango-dark); font-weight:700; }
+  .fv-ticket-divider { border-top:1px dashed #C9C2A4; margin:6px 0; }
+
+  .fv-login-panel { flex:1 1 340px; background:var(--parchment); padding:48px 40px; display:flex; flex-direction:column; justify-content:center; }
+  .fv-tabs { display:flex; gap:6px; margin-bottom:22px; background:var(--parchment-2); padding:4px; border-radius:10px; width:fit-content; }
+  .fv-tab { border:none; background:transparent; padding:8px 14px; border-radius:8px; font-size:13.5px; font-weight:600; color:var(--muted); display:flex; align-items:center; gap:6px; cursor:pointer; }
+  .fv-tab-active { background:var(--forest); color:var(--cream-text); }
+  .fv-form h2 { font-family:'Fraunces', serif; font-size:24px; margin:0 0 4px; }
+  .fv-form-sub { color:var(--muted); font-size:13px; margin:0 0 20px; }
+  .fv-field { display:flex; flex-direction:column; gap:6px; margin-bottom:14px; font-size:13px; font-weight:600; color:var(--forest-2); }
+  .fv-field input, .fv-field textarea, .fv-field select { font-family:inherit; font-size:14px; padding:10px 12px; border-radius:8px; border:1px solid #D8D0AF; background:#fff; color:var(--ink); font-weight:400; }
+  .fv-field input:focus, .fv-field textarea:focus, .fv-field select:focus { outline:2px solid var(--mango); outline-offset:1px; }
+  .fv-input-icon { display:flex; align-items:center; gap:8px; border:1px solid #D8D0AF; border-radius:8px; padding:0 10px; background:#fff; }
+  .fv-input-icon input { border:none; padding:10px 0; flex:1; }
+  .fv-input-icon input:focus { outline:none; }
+  .fv-error { color:var(--chili); font-size:12.5px; margin-bottom:10px; font-weight:600; }
+  .fv-field-row { display:flex; gap:12px; }
+  .fv-field-row .fv-field { flex:1; }
+
+  .fv-btn-primary { background:var(--mango); color:#fff; border:none; border-radius:9px; padding:11px 18px; font-weight:700; font-size:14px; display:inline-flex; align-items:center; gap:8px; cursor:pointer; transition:background 0.15s; }
+  .fv-btn-primary:hover { background:var(--mango-dark); }
+  .fv-btn-primary:disabled { background:#C9C2A4; cursor:not-allowed; }
+  .fv-btn-block { width:100%; justify-content:center; margin-top:6px; }
+
+  .fv-app { display:flex; flex-direction:column; min-height:100vh; }
+  .fv-topbar { background:var(--forest); color:var(--cream-text); padding:14px 24px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+  .fv-role-pill { font-family:'Work Sans',sans-serif; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; background:rgba(255,255,255,0.12); color:var(--parchment-2); padding:3px 8px; border-radius:20px; }
+  .fv-role-admin { background:var(--mango); color:#fff; }
+  .fv-topbar-right { display:flex; align-items:center; gap:12px; }
+  .fv-user-chip { text-align:right; }
+  .fv-user-name { font-size:13px; font-weight:600; }
+  .fv-user-sub { font-size:11px; color:var(--parchment-2); font-family:'IBM Plex Mono',monospace; }
+  .fv-icon-btn { background:rgba(255,255,255,0.1); border:none; color:var(--cream-text); width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:15px; }
+  .fv-icon-btn:hover { background:rgba(255,255,255,0.2); }
+  .fv-cart-btn { position:relative; background:rgba(255,255,255,0.1); border:none; color:var(--cream-text); width:38px; height:38px; border-radius:9px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:17px; }
+  .fv-cart-badge { position:absolute; top:-5px; right:-5px; background:var(--mango); color:#fff; font-size:10px; font-weight:700; border-radius:20px; min-width:16px; height:16px; display:flex; align-items:center; justify-content:center; padding:0 3px; }
+
+  .fv-subnav { display:flex; gap:4px; background:var(--parchment-2); padding:8px 24px; }
+  .fv-subnav-btn { background:transparent; border:none; padding:8px 14px; font-size:13px; font-weight:600; color:var(--muted); border-radius:8px; cursor:pointer; display:flex; align-items:center; gap:6px; }
+  .fv-subnav-active { background:var(--forest); color:var(--cream-text); }
+  .fv-count-pill { background:var(--mango); color:#fff; font-size:10.5px; font-weight:700; border-radius:20px; padding:1px 6px; }
+
+  .fv-content { padding:22px 24px 36px; flex:1; }
+
+  .fv-category-block { margin-bottom:22px; }
+  .fv-category-title { font-family:'Fraunces', serif; font-size:17px; color:var(--forest-2); margin:0 0 10px; }
+  .fv-menu-grid, .fv-admin-menu-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:12px; }
+
+  .fv-menu-card { background:#fff; border:1px solid #E3DDC3; border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:8px; }
+  .fv-menu-card-off { opacity:0.55; }
+  .fv-menu-card-top { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+  .fv-menu-card-top h4 { margin:0; font-size:14.5px; font-family:'Fraunces', serif; font-weight:600; }
+  .fv-price-tag { font-family:'IBM Plex Mono', monospace; font-weight:600; color:var(--mango-dark); font-size:13px; white-space:nowrap; }
+  .fv-menu-desc { font-size:12px; color:var(--muted); margin:0; line-height:1.4; }
+  .fv-unavailable { font-size:12px; color:var(--chili); font-weight:600; }
+  .fv-btn-add { align-self:flex-start; background:var(--forest); color:#fff; border:none; border-radius:7px; padding:6px 10px; font-size:12.5px; font-weight:600; display:flex; align-items:center; gap:5px; cursor:pointer; }
+  .fv-btn-add:hover { background:var(--forest-2); }
+  .fv-qty-stepper { display:flex; align-items:center; gap:10px; background:var(--parchment); border-radius:8px; padding:4px 8px; width:fit-content; }
+  .fv-qty-stepper button { border:none; background:var(--forest); color:#fff; width:20px; height:20px; border-radius:5px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .fv-qty-stepper span { font-family:'IBM Plex Mono', monospace; font-weight:600; min-width:14px; text-align:center; font-size:13px; }
+
+  .fv-cart-panel h2 { font-family:'Fraunces', serif; margin:0 0 14px; }
+  .fv-cart-list { display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
+  .fv-cart-row { display:flex; align-items:center; justify-content:space-between; gap:12px; background:#fff; border:1px solid #E3DDC3; border-radius:10px; padding:10px 14px; }
+  .fv-cart-row-name { font-weight:600; font-size:13.5px; }
+  .fv-cart-row-price { font-size:11.5px; color:var(--muted); }
+  .fv-cart-row-total { font-family:'IBM Plex Mono', monospace; font-weight:600; min-width:56px; text-align:right; }
+  .fv-cart-total-row { display:flex; justify-content:space-between; font-family:'IBM Plex Mono', monospace; font-weight:700; font-size:16px; border-top:2px dashed #D8D0AF; padding-top:12px; margin-bottom:14px; }
+
+  .fv-ticket-list { display:flex; flex-direction:column; gap:14px; max-width:360px; }
+  .fv-ticket { background:#fff; border-top:3px dashed var(--forest-2); border-radius:4px 4px 10px 10px; padding:14px 16px 12px; font-family:'IBM Plex Mono', monospace; font-size:12.5px; box-shadow:0 3px 10px rgba(27,46,40,0.08); position:relative; }
+  .fv-ticket-head { font-weight:700; color:var(--forest-2); }
+  .fv-ticket-customer { font-weight:600; color:var(--mango-dark); margin-bottom:4px; }
+  .fv-ticket-total { font-weight:700; }
+  .fv-status-pill { margin-top:8px; display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.3px; }
+  .fv-status-received { background:#FDEBD3; color:var(--mango-dark); }
+  .fv-status-preparing { background:#FBE4D9; color:var(--chili); }
+  .fv-status-ready { background:#E3EED2; color:var(--leaf); }
+  .fv-status-delivered { background:#E4E4DC; color:#5B5B4E; }
+  .fv-ticket-actions { display:flex; gap:6px; margin-top:10px; }
+  .fv-btn-mini { background:var(--forest); color:#fff; border:none; border-radius:6px; padding:6px 9px; font-size:11px; font-weight:600; display:flex; align-items:center; gap:4px; cursor:pointer; font-family:'Work Sans',sans-serif; }
+  .fv-btn-mini:hover { background:var(--forest-2); }
+  .fv-btn-mini-danger { background:var(--chili); }
+
+  .fv-kds { display:flex; gap:14px; overflow-x:auto; padding-bottom:6px; }
+  .fv-kds-col { flex:0 0 260px; background:var(--parchment-2); border-radius:12px; padding:10px; }
+  .fv-kds-col-head { display:flex; align-items:center; gap:6px; font-weight:700; font-size:13px; color:var(--forest-2); padding:4px 6px 10px; }
+  .fv-kds-col-body { display:flex; flex-direction:column; gap:10px; min-height:60px; }
+  .fv-kds-empty { font-size:12px; color:var(--muted); text-align:center; padding:16px 0; }
+
+  .fv-menu-admin-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px; }
+  .fv-menu-admin-head h2 { font-family:'Fraunces', serif; margin:0; }
+  .fv-admin-card { position:relative; }
+  .fv-admin-category { font-size:10.5px; text-transform:uppercase; letter-spacing:0.4px; color:var(--mango-dark); font-weight:700; }
+  .fv-admin-card-actions { display:flex; align-items:center; gap:6px; margin-top:4px; flex-wrap:wrap; }
+  .fv-icon-danger { color:var(--chili); }
+  .fv-toggle { display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--muted); margin-left:auto; cursor:pointer; }
+  .fv-toggle-modal { margin:4px 0 16px; }
+
+  .fv-modal-backdrop { position:fixed; inset:0; background:rgba(27,46,40,0.55); display:flex; align-items:center; justify-content:center; padding:20px; z-index:20; }
+  .fv-modal { background:var(--parchment); border-radius:14px; padding:22px; width:100%; max-width:380px; max-height:90vh; overflow:auto; }
+  .fv-modal-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+  .fv-modal-head h3 { font-family:'Fraunces', serif; margin:0; font-size:19px; }
+
+  .fv-toast { position:fixed; top:14px; left:50%; transform:translateX(-50%); background:var(--forest); color:#fff; padding:9px 18px; border-radius:20px; font-size:13px; font-weight:600; z-index:30; box-shadow:0 6px 18px rgba(0,0,0,0.2); }
+  .fv-empty { display:flex; flex-direction:column; align-items:center; gap:8px; color:var(--muted); padding:40px 0; text-align:center; }
+  .fv-note { font-size:11px; color:var(--muted); text-align:center; padding:10px 0 0; }
+
+  @media (max-width:480px) { .fv-login-wrap { flex-direction:column; } .fv-hero-ticket { width:auto; } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef, useCallback } = React;
+
+const ADMIN_EMAIL = "fruvera2026@gmail.com";
+const ADMIN_PASSWORD = "fruvera2026";
+const STATUS_FLOW = ["Received", "Preparing", "Ready", "Delivered"];
+const CATEGORIES = ["Bowls", "Juices & Coolers", "Salads", "Toast & Bites", "Sides"];
+
+const SEED_MENU = [
+  { id: "itm_1", name: "Mango Salsa Bowl", price: 249, category: "Bowls", desc: "Charred corn, black beans, mango salsa, lime crema.", available: true },
+  { id: "itm_2", name: "Citrus Greens Salad", price: 199, category: "Salads", desc: "Blood orange, fennel, rocket, toasted almonds.", available: true },
+  { id: "itm_3", name: "Berry Blast Smoothie", price: 149, category: "Juices & Coolers", desc: "Mixed berries, banana, oat milk.", available: true },
+  { id: "itm_4", name: "Papaya Mint Cooler", price: 129, category: "Juices & Coolers", desc: "Fresh papaya, mint, lime, soda top.", available: true },
+  { id: "itm_5", name: "Avocado Chilli Toast", price: 179, category: "Toast & Bites", desc: "Sourdough, smashed avocado, chilli oil, feta.", available: true },
+  { id: "itm_6", name: "Root Veg Power Plate", price: 269, category: "Bowls", desc: "Roasted beets, sweet potato, quinoa, tahini.", available: true },
+  { id: "itm_7", name: "Pickled Veg Side", price: 79, category: "Sides", desc: "Seasonal quick-pickled vegetables.", available: true },
+  { id: "itm_8", name: "Roasted Sweet Potato Fries", price: 99, category: "Sides", desc: "Rosemary salt, chipotle mayo.", available: true },
+];
+
+function randomId(prefix, len) {
+  len = len || 5;
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let s = "";
+  for (let i = 0; i < len; i++) s += chars[Math.floor(Math.random() * chars.length)];
+  return prefix + "-" + s;
+}
+function formatTime(ts) {
+  const d = new Date(ts);
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+function currency(n) { return "\u20B9" + Number(n).toFixed(0); }
+
+// ---- storage: uses localStorage since this file runs standalone in a browser ----
+function readLS(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch { return fallback; }
+}
+function writeLS(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { console.error(e); }
+}
+
+function App() {
+  const [booted, setBooted] = useState(false);
+  const [session, setSession] = useState(null);
+  const [loginTab, setLoginTab] = useState("customer");
+  const [menu, setMenu] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [cart, setCart] = useState({});
+  const [adminView, setAdminView] = useState("orders");
+  const [customerView, setCustomerView] = useState("menu");
+  const [toast, setToast] = useState(null);
+  const toastTimer = useRef(null);
+
+  const showToast = useCallback((msg) => {
+    setToast(msg);
+    clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 2200);
+  }, []);
+
+  useEffect(() => {
+    let m = readLS("fruvera-menu", null);
+    if (!m) { m = SEED_MENU; writeLS("fruvera-menu", m); }
+    const o = readLS("fruvera-orders", []);
+    const savedSession = readLS("fruvera-customer-session", null);
+    setMenu(m);
+    setOrders(o);
+    if (savedSession) setSession({ role: "customer", ...savedSession });
+    setBooted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!session) return;
+    const id = setInterval(() => {
+      setMenu(readLS("fruvera-menu", menu));
+      setOrders(readLS("fruvera-orders", orders));
+    }, 3000);
+    return () => clearInterval(id);
+  }, [session, menu, orders]);
+
+  function logout() {
+    if (session && session.role === "customer") writeLS("fruvera-customer-session", null);
+    setSession(null);
+    setCart({});
+    setLoginTab("customer");
+  }
+
+  function saveMenu(next) { setMenu(next); writeLS("fruvera-menu", next); }
+  function upsertItem(item) {
+    const exists = menu.some((m) => m.id === item.id);
+    const next = exists ? menu.map((m) => (m.id === item.id ? item : m)) : [...menu, item];
+    saveMenu(next);
+    showToast(exists ? "Item updated" : "Item added");
+  }
+  function deleteItem(id) { saveMenu(menu.filter((m) => m.id !== id)); showToast("Item removed"); }
+  function toggleAvailable(id) { saveMenu(menu.map((m) => (m.id === id ? { ...m, available: !m.available } : m))); }
+
+  function saveOrders(next) { setOrders(next); writeLS("fruvera-orders", next); }
+  function placeOrder() {
+    const items = Object.entries(cart).filter(([, qty]) => qty > 0).map(([itemId, qty]) => {
+      const m = menu.find((x) => x.id === itemId);
+      return { itemId, name: m ? m.name : "Item", price: m ? m.price : 0, qty };
+    });
+    if (!items.length) return;
+    const total = items.reduce((s, i) => s + i.price * i.qty, 0);
+    const order = { id: randomId("FRV", 4), customerId: session.id, customerName: session.name, items, total, status: "Received", createdAt: Date.now() };
+    saveOrders([order, ...orders]);
+    setCart({});
+    setCustomerView("orders");
+    showToast("Order placed!");
+  }
+  function advanceStatus(orderId) {
+    saveOrders(orders.map((o) => {
+      if (o.id !== orderId) return o;
+      const idx = STATUS_FLOW.indexOf(o.status);
+      return { ...o, status: STATUS_FLOW[Math.min(idx + 1, STATUS_FLOW.length - 1)] };
+    }));
+  }
+  function cancelOrder(orderId) { saveOrders(orders.filter((o) => o.id !== orderId)); showToast("Order removed"); }
+
+  if (!booted) {
+    return <div className="fv-root fv-center"><div className="fv-loading">🍃 Loading FRUVERA…</div></div>;
+  }
+
+  if (!session) {
+    return (
+      <LoginScreen
+        loginTab={loginTab}
+        setLoginTab={setLoginTab}
+        onAdminLogin={(email, pass) => {
+          if (email.trim().toLowerCase() === ADMIN_EMAIL && pass === ADMIN_PASSWORD) {
+            setSession({ role: "admin", name: "Admin" });
+            return true;
+          }
+          return false;
+        }}
+        onCustomerLogin={(name) => {
+          const id = randomId("CUST", 5);
+          const s = { id, name };
+          writeLS("fruvera-customer-session", s);
+          setSession({ role: "customer", ...s });
+        }}
+      />
+    );
+  }
+
+  return (
+    <div className="fv-root">
+      {toast && <div className="fv-toast">{toast}</div>}
+      {session.role === "admin" ? (
+        <AdminApp menu={menu} orders={orders} view={adminView} setView={setAdminView}
+          onUpsert={upsertItem} onDelete={deleteItem} onToggle={toggleAvailable}
+          onAdvance={advanceStatus} onCancel={cancelOrder} onLogout={logout} />
+      ) : (
+        <CustomerApp session={session} menu={menu}
+          orders={orders.filter((o) => o.customerId === session.id)}
+          cart={cart} setCart={setCart} view={customerView} setView={setCustomerView}
+          onPlaceOrder={placeOrder} onLogout={logout} />
+      )}
+    </div>
+  );
+}
+
+function LoginScreen({ loginTab, setLoginTab, onAdminLogin, onCustomerLogin }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
+
+  return (
+    <div className="fv-root fv-login-bg">
+      <div className="fv-login-wrap">
+        <div className="fv-login-hero">
+          <div className="fv-brand">🍃 FRUVERA</div>
+          <p className="fv-tagline">Fresh, made-to-order — from our kitchen to your table.</p>
+          <div className="fv-hero-ticket">
+            <div className="fv-ticket-row"><span>ORDER</span><span>#FRV-2C9K</span></div>
+            <div className="fv-ticket-row"><span>Mango Salsa Bowl</span><span>×1</span></div>
+            <div className="fv-ticket-row"><span>Papaya Mint Cooler</span><span>×2</span></div>
+            <div className="fv-ticket-divider"></div>
+            <div className="fv-ticket-row fv-ticket-status"><span>STATUS</span><span>Preparing</span></div>
+          </div>
+        </div>
+        <div className="fv-login-panel">
+          <div className="fv-tabs">
+            <button className={"fv-tab " + (loginTab === "customer" ? "fv-tab-active" : "")} onClick={() => { setLoginTab("customer"); setError(""); }}>👤 Customer</button>
+            <button className={"fv-tab " + (loginTab === "admin" ? "fv-tab-active" : "")} onClick={() => { setLoginTab("admin"); setError(""); }}>🏪 Restaurant Admin</button>
+          </div>
+          {loginTab === "customer" ? (
+            <div className="fv-form">
+              <h2>Start your order</h2>
+              <p className="fv-form-sub">Just your name — we'll set you up with an order ID, no password needed.</p>
+              <label className="fv-field">
+                <span>Your name</span>
+                <input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Priya"
+                  onKeyDown={(e) => e.key === "Enter" && name.trim() && onCustomerLogin(name.trim())} />
+              </label>
+              <button className="fv-btn-primary" disabled={!name.trim()} onClick={() => onCustomerLogin(name.trim())}>Enter FRUVERA →</button>
+            </div>
+          ) : (
+            <div className="fv-form">
+              <h2>Admin sign in</h2>
+              <p className="fv-form-sub">Manage the menu, pricing and incoming orders.</p>
+              <label className="fv-field">
+                <span>Email</span>
+                <div className="fv-input-icon">✉ <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin email" /></div>
+              </label>
+              <label className="fv-field">
+                <span>Password</span>
+                <div className="fv-input-icon">🔒 <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="password"
+                  onKeyDown={(e) => { if (e.key === "Enter") { const ok = onAdminLogin(email, password); setError(ok ? "" : "Incorrect email or password."); } }} /></div>
+              </label>
+              {error && <div className="fv-error">{error}</div>}
+              <button className="fv-btn-primary" onClick={() => { const ok = onAdminLogin(email, password); setError(ok ? "" : "Incorrect email or password."); }}>Sign in →</button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CustomerApp({ session, menu, orders, cart, setCart, view, setView, onPlaceOrder, onLogout }) {
+  const cartCount = Object.values(cart).reduce((s, n) => s + n, 0);
+  const cartTotal = Object.entries(cart).reduce((s, [id, qty]) => {
+    const item = menu.find((m) => m.id === id);
+    return s + (item ? item.price * qty : 0);
+  }, 0);
+
+  function changeQty(id, delta) {
+    setCart((prev) => {
+      const next = { ...prev };
+      const q = (next[id] || 0) + delta;
+      if (q <= 0) delete next[id]; else next[id] = q;
+      return next;
+    });
+  }
+
+  const grouped = CATEGORIES.map((cat) => ({ cat, items: menu.filter((m) => m.category === cat) })).filter((g) => g.items.length);
+
+  return (
+    <div className="fv-app">
+      <TopBar role="customer" name={session.name} subtitle={session.id} onLogout={onLogout}
+        right={<button className="fv-cart-btn" onClick={() => setView("cart")}>🛒{cartCount > 0 && <span className="fv-cart-badge">{cartCount}</span>}</button>} />
+      <div className="fv-subnav">
+        <button className={"fv-subnav-btn " + (view === "menu" ? "fv-subnav-active" : "")} onClick={() => setView("menu")}>Menu</button>
+        <button className={"fv-subnav-btn " + (view === "orders" ? "fv-subnav-active" : "")} onClick={() => setView("orders")}>My Orders {orders.length > 0 && <span className="fv-count-pill">{orders.length}</span>}</button>
+      </div>
+      <div className="fv-content">
+        {view === "menu" && (
+          <div>
+            {grouped.map((g) => (
+              <div key={g.cat} className="fv-category-block">
+                <h3 className="fv-category-title">{g.cat}</h3>
+                <div className="fv-menu-grid">
+                  {g.items.map((item) => (
+                    <div key={item.id} className={"fv-menu-card " + (!item.available ? "fv-menu-card-off" : "")}>
+                      <div className="fv-menu-card-top"><h4>{item.name}</h4><span className="fv-price-tag">{currency(item.price)}</span></div>
+                      <p className="fv-menu-desc">{item.desc}</p>
+                      {!item.available ? (
+                        <div className="fv-unavailable">Currently unavailable</div>
+                      ) : cart[item.id] ? (
+                        <div className="fv-qty-stepper"><button onClick={() => changeQty(item.id, -1)}>−</button><span>{cart[item.id]}</span><button onClick={() => changeQty(item.id, 1)}>+</button></div>
+                      ) : (
+                        <button className="fv-btn-add" onClick={() => changeQty(item.id, 1)}>+ Add</button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+            {menu.length === 0 && <EmptyState text="The menu is empty right now — check back soon." />}
+          </div>
+        )}
+        {view === "cart" && (
+          <div className="fv-cart-panel">
+            <h2>Your cart</h2>
+            {cartCount === 0 ? <EmptyState text="Your cart is empty. Add something fresh from the menu." /> : (
+              <>
+                <div className="fv-cart-list">
+                  {Object.entries(cart).map(([id, qty]) => {
+                    const item = menu.find((m) => m.id === id);
+                    if (!item) return null;
+                    return (
+                      <div key={id} className="fv-cart-row">
+                        <div><div className="fv-cart-row-name">{item.name}</div><div className="fv-cart-row-price">{currency(item.price)} each</div></div>
+                        <div className="fv-qty-stepper"><button onClick={() => changeQty(id, -1)}>−</button><span>{qty}</span><button onClick={() => changeQty(id, 1)}>+</button></div>
+                        <div className="fv-cart-row-total">{currency(item.price * qty)}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="fv-cart-total-row"><span>Total</span><span>{currency(cartTotal)}</span></div>
+                <button className="fv-btn-primary fv-btn-block" onClick={onPlaceOrder}>Place order →</button>
+              </>
+            )}
+          </div>
+        )}
+        {view === "orders" && (
+          <div>
+            {orders.length === 0 ? <EmptyState text="No orders yet — your placed orders will show up here as tickets." /> : (
+              <div className="fv-ticket-list">
+                {orders.slice().sort((a, b) => b.createdAt - a.createdAt).map((o) => <OrderTicket key={o.id} order={o} showCustomer={false} />)}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AdminApp({ menu, orders, view, setView, onUpsert, onDelete, onToggle, onAdvance, onCancel, onLogout }) {
+  const [editing, setEditing] = useState(null);
+  const activeOrders = orders.filter((o) => o.status !== "Delivered");
+
+  return (
+    <div className="fv-app">
+      <TopBar role="admin" name="Admin" subtitle={ADMIN_EMAIL} onLogout={onLogout} />
+      <div className="fv-subnav">
+        <button className={"fv-subnav-btn " + (view === "orders" ? "fv-subnav-active" : "")} onClick={() => setView("orders")}>Orders {activeOrders.length > 0 && <span className="fv-count-pill">{activeOrders.length}</span>}</button>
+        <button className={"fv-subnav-btn " + (view === "menu" ? "fv-subnav-active" : "")} onClick={() => setView("menu")}>Menu &amp; Pricing</button>
+      </div>
+      <div className="fv-content">
+        {view === "orders" && (
+          <div className="fv-kds">
+            {STATUS_FLOW.map((status) => (
+              <div key={status} className="fv-kds-col">
+                <div className="fv-kds-col-head"><StatusIcon status={status} /><span>{status}</span><span className="fv-count-pill">{orders.filter((o) => o.status === status).length}</span></div>
+                <div className="fv-kds-col-body">
+                  {orders.filter((o) => o.status === status).sort((a, b) => a.createdAt - b.createdAt).map((o) => (
+                    <OrderTicket key={o.id} order={o} showCustomer onAdvance={status !== "Delivered" ? () => onAdvance(o.id) : null} onCancel={() => onCancel(o.id)} />
+                  ))}
+                  {orders.filter((o) => o.status === status).length === 0 && <div className="fv-kds-empty">No orders</div>}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        {view === "menu" && (
+          <div>
+            <div className="fv-menu-admin-head">
+              <h2>Menu &amp; pricing</h2>
+              <button className="fv-btn-primary" onClick={() => setEditing({ id: null, name: "", price: "", category: CATEGORIES[0], desc: "", available: true })}>+ Add item</button>
+            </div>
+            <div className="fv-admin-menu-grid">
+              {menu.map((item) => (
+                <div key={item.id} className={"fv-menu-card fv-admin-card " + (!item.available ? "fv-menu-card-off" : "")}>
+                  <div className="fv-menu-card-top"><h4>{item.name}</h4><span className="fv-price-tag">{currency(item.price)}</span></div>
+                  <div className="fv-admin-category">{item.category}</div>
+                  <p className="fv-menu-desc">{item.desc}</p>
+                  <div className="fv-admin-card-actions">
+                    <button className="fv-icon-btn" title="Edit" onClick={() => setEditing(item)}>✎</button>
+                    <button className="fv-icon-btn fv-icon-danger" title="Delete" onClick={() => onDelete(item.id)}>🗑</button>
+                    <label className="fv-toggle"><input type="checkbox" checked={item.available} onChange={() => onToggle(item.id)} /><span>{item.available ? "Available" : "Hidden"}</span></label>
+                  </div>
+                </div>
+              ))}
+              {menu.length === 0 && <EmptyState text="No items yet. Add your first menu item." />}
+            </div>
+          </div>
+        )}
+      </div>
+      {editing && (
+        <MenuItemModal item={editing} onClose={() => setEditing(null)}
+          onSave={(item) => { onUpsert({ ...item, id: item.id || ("itm_" + Date.now()), price: Number(item.price) || 0 }); setEditing(null); }} />
+      )}
+    </div>
+  );
+}
+
+function MenuItemModal({ item, onClose, onSave }) {
+  const [form, setForm] = useState(item);
+  const isNew = !item.id;
+  return (
+    <div className="fv-modal-backdrop" onClick={onClose}>
+      <div className="fv-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="fv-modal-head"><h3>{isNew ? "Add menu item" : "Edit menu item"}</h3><button className="fv-icon-btn" onClick={onClose}>✕</button></div>
+        <label className="fv-field"><span>Name</span><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Mango Salsa Bowl" /></label>
+        <div className="fv-field-row">
+          <label className="fv-field"><span>Price (₹)</span><input type="number" min="0" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="0" /></label>
+          <label className="fv-field"><span>Category</span><select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>{CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}</select></label>
+        </div>
+        <label className="fv-field"><span>Description</span><textarea rows={2} value={form.desc} onChange={(e) => setForm({ ...form, desc: e.target.value })} placeholder="Short description"></textarea></label>
+        <label className="fv-toggle fv-toggle-modal"><input type="checkbox" checked={form.available} onChange={(e) => setForm({ ...form, available: e.target.checked })} /><span>Available to customers</span></label>
+        <button className="fv-btn-primary fv-btn-block" disabled={!form.name.trim()} onClick={() => onSave(form)}>✓ Save item</button>
+      </div>
+    </div>
+  );
+}
+
+function TopBar({ role, name, subtitle, onLogout, right }) {
+  return (
+    <div className="fv-topbar">
+      <div className="fv-brand fv-brand-sm">🍃 FRUVERA <span className={"fv-role-pill " + (role === "admin" ? "fv-role-admin" : "")}>{role === "admin" ? "Restaurant" : "Customer"}</span></div>
+      <div className="fv-topbar-right">
+        <div className="fv-user-chip"><div className="fv-user-name">{name}</div><div className="fv-user-sub">{subtitle}</div></div>
+        {right}
+        <button className="fv-icon-btn" title="Log out" onClick={onLogout}>⎋</button>
+      </div>
+    </div>
+  );
+}
+
+function StatusIcon({ status }) {
+  const map = { Received: "🔔", Preparing: "🍳", Ready: "📦", Delivered: "✓" };
+  return <span>{map[status] || "•"}</span>;
+}
+
+function OrderTicket({ order, showCustomer, onAdvance, onCancel }) {
+  return (
+    <div className="fv-ticket">
+      <div className="fv-ticket-row fv-ticket-head"><span>#{order.id}</span><span>{formatTime(order.createdAt)}</span></div>
+      {showCustomer && <div className="fv-ticket-customer">{order.customerName}</div>}
+      <div className="fv-ticket-divider"></div>
+      {order.items.map((it) => <div key={it.itemId} className="fv-ticket-row"><span>{it.name}</span><span>×{it.qty}</span></div>)}
+      <div className="fv-ticket-divider"></div>
+      <div className="fv-ticket-row fv-ticket-total"><span>Total</span><span>{currency(order.total)}</span></div>
+      <div className={"fv-status-pill fv-status-" + order.status.toLowerCase()}><StatusIcon status={order.status} /> {order.status}</div>
+      {(onAdvance || onCancel) && (
+        <div className="fv-ticket-actions">
+          {onAdvance && <button className="fv-btn-mini" onClick={onAdvance}>Mark {STATUS_FLOW[STATUS_FLOW.indexOf(order.status) + 1]} →</button>}
+          {onCancel && <button className="fv-btn-mini fv-btn-mini-danger" onClick={onCancel}>🗑</button>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function EmptyState({ text }) { return <div className="fv-empty">↻<p>{text}</p></div>; }
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
